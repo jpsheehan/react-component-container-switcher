@@ -1,6 +1,15 @@
 {
     "name": "react-component-container-switcher",
     "displayName": "React Component Container Switcher",
+    "author": {
+        "email": "jesse@sheehan.nz",
+        "name": "JP Sheehan",
+        "url": "https://sheehan.nz/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jpsheehan/react-component-container-switcher"
+    },
     "description": "Allows easy switching between React Components and their associated Containers.",
     "version": "0.0.1",
     "engines": {
@@ -18,6 +27,13 @@
             {
                 "command": "extension.switch",
                 "title": "RCCS: React Component/Container Switcher"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "extension.switch",
+                "key": "Alt+c",
+                "when": "editorFocus"
             }
         ]
     },
