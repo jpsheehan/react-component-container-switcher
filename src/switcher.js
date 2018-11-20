@@ -139,68 +139,56 @@ function getOtherPath(filePath) {
     // kind of layout the container has. We search through all possible
     // validComponentFolders with the suggested folder name first.
     const suggestedFolderName = thatFolders[componentPathIndex];
-    let componentPath = null;
-    let componentExists = null;
 
-    for (let componentFolderName of [suggestedFolderName, ...thatFolders.filter((folderName) => folderName !== suggestedFolderName)]) {
+    // reorder these so that we are looking for the preferred filename extension and folder names first
+    const reorderedValidExtensions = [fileExt, ...validExtensions.filter((ext) => ext !== fileExt)];
+    const reorderedValidThatFolders = [suggestedFolderName, ...thatFolders.filter((folderName) => folderName !== suggestedFolderName)];
 
-        // the parent directory of the component if the parent directory name is correct.
-        const componentParentPath = path.resolve(path.join(containerFolderPath, '..', componentFolderName));
+    for (let ext of reorderedValidExtensions) {
 
-        // the path of the component if it is indeed inside a folder
-        const componentPathFolder = path.join(componentParentPath, containerName, 'index' + fileExt);
+        for (let componentFolderName of reorderedValidThatFolders) {
 
-        // the path of the component if it is in a file by itself.
-        const componentPathStandalone = path.join(componentParentPath, containerName + fileExt);
-        
-        // here, we will try both the folder and standalone paths but in the order that is
-        // inferred by the location of the container
-        if (isContainerInFolder) {
+            // the parent directory of the component if the parent directory name is correct.
+            const componentParentPath = path.resolve(path.join(containerFolderPath, '..', componentFolderName));
 
-            componentPath = componentPathFolder;
-            componentExists = fs.existsSync(componentPath);
+            // the path of the component if it is indeed inside a folder
+            const componentPathFolder = path.join(componentParentPath, containerName, 'index' + ext);
 
-            if (componentExists) {
-                break;
+            // the path of the component if it is in a file by itself.
+            const componentPathStandalone = path.join(componentParentPath, containerName + ext);
+
+            let componentPath = null;
+            
+            // here, we will try both the folder and standalone paths but in the order that is
+            // inferred by the location of the container
+            if (isContainerInFolder) {
+
+                componentPath = componentPathFolder;
+                if (fs.existsSync(componentPath)) {
+                    return componentPath;
+                }
+
+                componentPath = componentPathStandalone;
+                if (fs.existsSync(componentPath)) {
+                    return componentPath;
+                }
 
             } else {
 
                 componentPath = componentPathStandalone;
-                componentExists = fs.existsSync(componentPath);
-
-                if (componentExists) {
-                    break;
+                if (fs.existsSync(componentPath)) {
+                    return componentPath;
                 }
 
-            }
-
-        } else {
-
-            componentPath = componentPathStandalone;
-            componentExists = fs.existsSync(componentPath);
-
-            if (componentExists) {
-                break;
-
-            } else {
-
                 componentPath = componentPathFolder;
-                componentExists = fs.existsSync(componentPath);
-
-                if (componentExists) {
-                    break;
+                if (fs.existsSync(componentPath)) {
+                    return componentPath;
                 }
 
             }
 
         }
-
-    }
-
-    if (componentExists) {
-
-        return componentPath;
-
+    
     }
 
     return {error: errors.ERROR_COULD_NOT_FIND};
