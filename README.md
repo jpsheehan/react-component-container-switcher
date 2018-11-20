@@ -4,7 +4,7 @@ This extension allows you to quickly switch between your React components and th
 
 ## Features
 
-Pressing `Ctrl+Shift+P` and then typing `RCCS` will allow you to switch between components and containers. ALternatively, pressing `Alt+C` will also switch between the two.
+Pressing `Ctrl+Shift+P` and then begin typing `RCCS: Switch to associated component/container` which will allow you to switch between components and containers. ALternatively, pressing `Alt+C` will also switch between the two.
 
 ## Requirements
 

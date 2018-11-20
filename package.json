@@ -27,7 +27,8 @@
         "commands": [
             {
                 "command": "extension.switch",
-                "title": "RCCS: React Component/Container Switcher"
+                "title": "Switch to associated component/container",
+                "category": "RCCS"
             }
         ],
         "keybindings": [
