@@ -1,35 +1,55 @@
-# react-component-container-switcher README
+# React Component/Container Switcher
 
-This is the README for your extension "react-component-container-switcher". After writing up a brief description, we recommend including the following sections.
+This extension allows you to quickly switch between your React components and their associated containers.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Pressing `Ctrl+Shift+P` and then typing `RCCS` will allow you to switch between components and containers. ALternatively, pressing `Alt+C` will also switch between the two.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+For this extension to work, your container and component folders must be siblings. And the components must be nested directly below either as in their own folders or in standalone files. Currently, only `.js` and `.ts` files are supported. The following are valid folder names for components and containers:
 
-## Extension Settings
+### Valid component folder names:
+- `component`
+- `components`
+- `Component`
+- `Components`
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+### Valid container folder names:
+- `container`
+- `containers`
+- `Container`
+- `Containers`
 
-For example:
+If the extension cannot find a valid component/container to switch to, it will display a small message in the corner of the editor letting you know.
 
-This extension contributes the following settings:
+## Example directory structure:
+This is an example of a valid (although, poor) directory structure, where every component has a corresponding container:
+```
++---components
+|   |   Navbar.js
+|   |   SignIn.ts
+|   |
+|   +---Avatar
+|   |       index.js
+|   |
+|   \---SignOut
+|           index.ts
+|
+\---Container
+    |   Avatar.ts
+    |   SignIn.ts
+    |   SignOut.js
+    |
+    \---Navbar
+            index.js
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+```
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+No known issues.
 
 ## Release Notes
 
@@ -37,29 +57,4 @@ Users appreciate release notes as you update your extension.
 
 ### 1.0.0
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Initial release.
