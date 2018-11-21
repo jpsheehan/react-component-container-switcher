@@ -12,7 +12,7 @@
         "url": "https://github.com/jpsheehan/react-component-container-switcher"
     },
     "description": "Allows easy switching between React Components and their associated Containers.",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "engines": {
         "vscode": "^1.29.0"
     },
