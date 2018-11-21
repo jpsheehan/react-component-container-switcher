@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const errors = require('./errors');
 
-const validExtensions = ['.js', '.ts'];
+const validExtensions = ['.js', '.ts', '.jsx', '.tsx'];
 const validContainerFolders = ['container', 'Container', 'containers', 'Containers'];
 const validComponentFolders = ['component', 'Component', 'components', 'Components'];
 

@@ -8,7 +8,7 @@ Pressing `Ctrl+Shift+P` and then begin typing `RCCS: Switch to associated compon
 
 ## Requirements
 
-For this extension to work, your container and component folders must be siblings. And the components must be nested directly below either as in their own folders or in standalone files. Currently, only `.js` and `.ts` files are supported. The following are valid folder names for components and containers:
+For this extension to work, your container and component folders must be siblings. And the components must be nested directly below either as in their own folders or in standalone files. Currently, only `.js`, `.jsx`, `.ts` and `.tsx` files are supported. The following are valid folder names for components and containers:
 
 ### Valid component folder names:
 - `component`
@@ -55,6 +55,10 @@ No known issues.
 
 Users appreciate release notes as you update your extension.
 
-### 1.0.0
+### 0.1.1
+
+Added support for `.jsx` and `.tsx` files.
+
+### 0.1.0
 
 Initial release.
