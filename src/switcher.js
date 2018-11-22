@@ -13,6 +13,51 @@ const FileType = {
     Container: 2,
 };
 
+const ColumnPosition = {
+    Same: vscode.ViewColumn.Active,
+    Left: vscode.ViewColumn.One,
+    Right: vscode.ViewColumn.Two,
+};
+
+/**
+ * Gets the column to open the document in depending on the configuration and whether
+ * or not it's a container or a component.
+ * 
+ * @param {Number} type The type of file as returned by `detectTypeOfFile`
+ * @return {Number} Returns the column id where the document should be opened.
+ */
+function getColumnToOpenIn(type) {
+
+    const positionConfig = vscode.workspace.getConfiguration().get('rccs.alwaysOpenContainersToTheLeft');
+    
+    if (positionConfig === 'Same') {
+
+        return ColumnPosition.Same;
+
+    } else {
+
+        if (type === FileType.Container) {
+
+            return ColumnPosition[positionConfig];
+
+        } else {
+
+            if (positionConfig === 'Left') {
+
+                return ColumnPosition.Right;
+
+            } else {
+
+                return ColumnPosition.Left;
+
+            }
+
+        }
+
+    }
+
+}
+
 /**
  * Attempts to detect the type of file this is.
  * @param {String} filePath The path of the file to detect the type of.
@@ -218,23 +263,24 @@ function getOtherPath(filePath) {
 
 function switchToOther() {
 
-    const path = getPath(vscode.window.activeTextEditor);
+    const thisPath = getPath(vscode.window.activeTextEditor);
 
-    if (!path) {
+    if (!thisPath) {
         vscode.window.showErrorMessage(errors.ERROR_NOT_OPENED);
         return;
     }
 
-    const component = getOtherPath(path);
+    const thatPath = getOtherPath(thisPath);
+    const thatType = detectTypeOfFile(thatPath);
 
-    if (component.error) {
-        vscode.window.showErrorMessage(component.error);
+    if (thatPath.error) {
+        vscode.window.showErrorMessage(thatPath.error);
         return;
     }
 
     // open the document in an editor
-    vscode.workspace.openTextDocument(component).then((document) => {
-        vscode.window.showTextDocument(document);
+    vscode.workspace.openTextDocument(thatPath).then((document) => {
+        vscode.window.showTextDocument(document, getColumnToOpenIn(thatType));
     }, (err) => {
         vscode.window.showErrorMessage(err.toString());
     });

@@ -37,7 +37,19 @@
                 "key": "Alt+c",
                 "when": "editorFocus"
             }
-        ]
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "React Component/Container Switcher Configuration",
+            "properties": {
+                "rccs.alwaysOpenContainersToTheLeft": {
+                    "type": "string",
+                    "enum": ["Same", "Left", "Right"],
+                    "default": "left",
+                    "description": "Which pane should containers always be opened in?"
+                }
+            }
+        }
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",

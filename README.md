@@ -55,6 +55,10 @@ No known issues.
 
 Users appreciate release notes as you update your extension.
 
+### 0.2.0
+
+Added a configuration option for opening containers always in the left, right or active column.
+
 ### 0.1.2
 
 Added support for `.jsx` and `.tsx` files.
