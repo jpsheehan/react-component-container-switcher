@@ -40,7 +40,7 @@ class StatusBarMonitor {
 
                     // set the text and tooltip for if the other file doesn't exist
                     this.item.text = `$(alert) ${info.name} ${info.type}`;
-                    this.item.tooltip = `The ${info.name} ${info.type} doesn't have an associated ${info.otherType}.`;
+                    this.item.tooltip = `Click to create a new ${info.name} ${info.otherType}.`;
 
                 }
                 this.item.show();

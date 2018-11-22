@@ -20,7 +20,31 @@ function switcher() {
     const info = getFileInformation(thisPath);
 
     if (info.error) {
-        vscode.window.showErrorMessage(info.error);
+        
+        if (info.otherParentPaths && info.otherParentPaths.length) {
+
+            // at this point, we don't have an 'other' file to switch to, but we can create one
+            
+            // prompt the user to create one
+            vscode.window.showQuickPick(['Yes', 'No'], {
+                canPickMany: false,
+                placeHolder: `An existing ${info.otherType} doesn't exist, would you like to create one?`,
+            }).then((selection) => {
+
+                if (selection && selection === 'Yes') {
+
+                    console.log(`Here, we would create a new ${info.otherType}`);
+
+                }
+
+            });
+
+        } else {
+
+            vscode.window.showErrorMessage(info.error);
+        
+        }
+
         return;
     }
 
