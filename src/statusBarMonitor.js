@@ -29,8 +29,19 @@ class StatusBarMonitor {
             if (info.type) {
     
                 // show the item
-                this.item.text = `${info.name} ${info.type}`;
-                this.item.tooltip = `Click to switch to the ${info.name} ${info.otherType}`;
+                if (info.otherPath) {
+
+                    // set the text and tooltip for if the other file exists
+                    this.item.text = `${info.name} ${info.type}`;
+                    this.item.tooltip = `Click to switch to the ${info.name} ${info.otherType}.`;
+
+                } else {
+
+                    // set the text and tooltip for if the other file doesn't exist
+                    this.item.text = `$(alert) ${info.name} ${info.type}`;
+                    this.item.tooltip = `The ${info.name} ${info.type} doesn't have an associated ${info.otherType}.`;
+
+                }
                 this.item.show();
     
             } else {

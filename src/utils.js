@@ -257,7 +257,6 @@ function getFileInformation(filePath) {
     }
 
     info.otherPath = '';
-    info.otherType = '';
     info.error = errors.ERROR_COULD_NOT_FIND;
 
     return info;
