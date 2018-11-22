@@ -1,6 +1,6 @@
 const vscode = require('vscode');
 const {
-    getPath, detectFileType,
+    getPath, getFileInformation,
 } = require('./utils');
 
 class StatusBarMonitor {
@@ -24,16 +24,13 @@ class StatusBarMonitor {
 
         if (path) {
     
-            const fileType = detectFileType(path);
-            const otherFileType = fileType === 'Component'
-                ? 'Container'
-                : 'Component';
+            const info = getFileInformation(path);
     
-            if (fileType) {
+            if (info.type) {
     
                 // show the item
-                this.item.text = `React ${fileType}`;
-                this.item.tooltip = `Click to switch to the associated React ${otherFileType}`;
+                this.item.text = `${info.name} ${info.type}`;
+                this.item.tooltip = `Click to switch to the ${info.name} ${info.otherType}`;
                 this.item.show();
     
             } else {

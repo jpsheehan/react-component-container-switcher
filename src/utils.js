@@ -20,6 +20,22 @@ const ColumnPosition = {
 };
 
 /**
+ * A better version of fs.existsSync because Windows doesn't play nicely with
+ * case sensitive folder names apparently...
+ * 
+ * @param {String} path The path to the resouce.
+ * @return {Boolean} True if the resource exists, false otherwise.
+ */
+function existsSync(path) {
+    try {
+        fs.accessSync(path, fs.constants.F_OK | fs.constants.R_OK)
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
+/**
  * Gets the column to open the document in depending on the configuration and whether
  * or not it's a container or a component.
  * 
@@ -101,6 +117,154 @@ function detectFileType(filePath) {
 }
 
 /**
+ * Gets a whole bunch of information about the file.
+ * 
+ * @param {String} filePath The file path.
+ * @return {Object} Returns an object in the form:
+ * ```
+{
+    name,
+    type,
+    isStandAlone,
+    extension,
+    path,
+    otherPath,
+} | { error }```
+ */
+function getFileInformation(filePath) {
+
+    const info = {};
+
+    info.path = filePath;
+    info.extension = path.extname(info.path);
+
+    // get some basic, but neccessary file and folder information
+    const fileName = path.basename(info.path, info.extension);
+
+    const parentPath = path.resolve(path.join(filePath, '..'));
+    const parentName = path.basename(parentPath);
+
+    const grandParentPath = path.resolve(parentPath, '..');
+    const grandParentName = path.basename(grandParentPath);
+
+    let thisFolders = null;
+    let thatFolders = null;
+
+    info.type = detectFileType(info.path);
+
+    // detect the type of path this is (component/container)
+    switch (info.type) {
+        case FileType.Component:
+            thisFolders = validComponentFolders;
+            thatFolders = validContainerFolders;
+            info.otherType = FileType.Container;
+            break;
+        case FileType.Container:
+            thisFolders = validContainerFolders;
+            thatFolders = validComponentFolders;
+            info.otherType = FileType.Component;
+            break;
+        default:
+            return {error: errors.ERROR_COULD_NOT_DETERMINE};
+    }
+
+    // detect the container name
+    let thisFolderPath = null;
+    let thatPathIndex = null;
+
+    // we check if its parent has a valid container name
+    thatPathIndex = thisFolders.indexOf(parentName);
+    if (thatPathIndex !== -1) {
+
+        info.name = fileName;
+        thisFolderPath = parentPath;
+        info.isStandalone = false;
+
+    } else {
+
+        // otherwise, if this file is index.js or index.ts, check to see if its grandparent
+        // has a valid container name
+        thatPathIndex = thisFolders.indexOf(grandParentName);
+        if (fileName === 'index' && thatPathIndex !== -1) {
+
+            info.name = parentName;
+            thisFolderPath = grandParentPath;
+            info.isStandalone = true;
+
+        }
+
+    }
+
+    if (!(info.name && thisFolderPath)) {
+
+        // this shouldn't be reached but it's still good to check
+        return {error: errors.ERROR_COULD_NOT_FIND};
+
+    }
+
+    // attempt to find the corresponding component that best matches what
+    // kind of layout the container has. We search through all possible
+    // validComponentFolders with the suggested folder name first.
+    const suggestedFolderName = thatFolders[thatPathIndex];
+
+    // reorder these so that we are looking for the preferred filename extension and folder names first
+    const reorderedValidExtensions = [info.extension, ...validExtensions.filter((ext) => ext !== info.extension)];
+    const reorderedValidThatFolders = [suggestedFolderName, ...thatFolders.filter((folderName) => folderName !== suggestedFolderName)];
+
+    for (let ext of reorderedValidExtensions) {
+
+        for (let thatFolderName of reorderedValidThatFolders) {
+
+            // the parent directory of the component if the parent directory name is correct.
+            const thatParentPath = path.resolve(path.join(thisFolderPath, '..', thatFolderName));
+
+            // the path of the component if it is indeed inside a folder
+            const thatPathFolder = path.join(thatParentPath, info.name, 'index' + ext);
+
+            // the path of the component if it is in a file by itself.
+            const thatPathStandalone = path.join(thatParentPath, info.name + ext);
+
+            // here, we will try both the folder and standalone paths but in the order that is
+            // inferred by the location of the container
+            if (info.isStandalone) {
+
+                info.otherPath = thatPathFolder;
+                if (existsSync(info.otherPath)) {
+                    return info;
+                }
+
+                info.otherPath = thatPathStandalone;
+                if (existsSync(info.otherPath)) {
+                    return info;
+                }
+
+            } else {
+
+                info.otherPath = thatPathStandalone;
+                if (existsSync(info.otherPath)) {
+                    return info;
+                }
+
+                info.otherPath = thatPathFolder;
+                if (existsSync(info.otherPath)) {
+                    return info;
+                }
+
+            }
+
+        }
+
+    }
+
+    info.otherPath = '';
+    info.otherType = '';
+    info.error = errors.ERROR_COULD_NOT_FIND;
+
+    return info;
+
+}
+
+/**
  * Gets the filename of the currently opened file.
  * @param {Object} uri The URI of the currently opened file.
  * @return {String?} The filename of the file opened by the editor or null
@@ -125,138 +289,8 @@ function getPath(uri) {
 
 }
 
-/**
- * Decides whether or not the path is a belongs to a container.
- * @param {String} filePath The filename path of the active container or the component.
- * @return {String|Object}
- */
-function getOtherPath(filePath) {
-
-    // get some basic, but neccessary file and folder information
-    const fileExt = path.extname(filePath);
-    const fileName = path.basename(filePath, fileExt);
-
-    const parentPath = path.resolve(path.join(filePath, '..'));
-    const parentName = path.basename(parentPath);
-
-    const grandParentPath = path.resolve(parentPath, '..');
-    const grandParentName = path.basename(grandParentPath);
-
-    let thisFolders = null;
-    let thatFolders = null;
-
-    // detect the type of path this is (component/container)
-    switch (detectFileType(filePath)) {
-        case FileType.Component:
-            thisFolders = validComponentFolders;
-            thatFolders = validContainerFolders;
-            break;
-        case FileType.Container:
-            thisFolders = validContainerFolders;
-            thatFolders = validComponentFolders;
-            break;
-        default:
-            return {error: errors.ERROR_COULD_NOT_DETERMINE};
-    }
-
-    // detect the container name
-    let thisName = null;
-    let thisFolderPath = null;
-    let thatPathIndex = null;
-    let isThisInFolder = null;
-
-    // we check if its parent has a valid container name
-    thatPathIndex = thisFolders.indexOf(parentName);
-    if (thatPathIndex !== -1) {
-
-        thisName = fileName;
-        thisFolderPath = parentPath;
-        isThisInFolder = false;
-
-    } else {
-
-        // otherwise, if this file is index.js or index.ts, check to see if its grandparent
-        // has a valid container name
-        thatPathIndex = thisFolders.indexOf(grandParentName);
-        if (fileName === 'index' && thatPathIndex !== -1) {
-
-            thisName = parentName;
-            thisFolderPath = grandParentPath;
-            isThisInFolder = true;
-
-        }
-
-    }
-
-    if (!(thisName && thisFolderPath)) {
-
-        // this shouldn't be reached but it's still good to check
-        return {error: errors.ERROR_COULD_NOT_FIND};
-    
-    }
-
-    // attempt to find the corresponding component that best matches what
-    // kind of layout the container has. We search through all possible
-    // validComponentFolders with the suggested folder name first.
-    const suggestedFolderName = thatFolders[thatPathIndex];
-
-    // reorder these so that we are looking for the preferred filename extension and folder names first
-    const reorderedValidExtensions = [fileExt, ...validExtensions.filter((ext) => ext !== fileExt)];
-    const reorderedValidThatFolders = [suggestedFolderName, ...thatFolders.filter((folderName) => folderName !== suggestedFolderName)];
-
-    for (let ext of reorderedValidExtensions) {
-
-        for (let thatFolderName of reorderedValidThatFolders) {
-
-            // the parent directory of the component if the parent directory name is correct.
-            const thatParentPath = path.resolve(path.join(thisFolderPath, '..', thatFolderName));
-
-            // the path of the component if it is indeed inside a folder
-            const thatPathFolder = path.join(thatParentPath, thisName, 'index' + ext);
-
-            // the path of the component if it is in a file by itself.
-            const thatPathStandalone = path.join(thatParentPath, thisName + ext);
-
-            let thatPath = null;
-            
-            // here, we will try both the folder and standalone paths but in the order that is
-            // inferred by the location of the container
-            if (isThisInFolder) {
-
-                thatPath = thatPathFolder;
-                if (fs.existsSync(thatPath)) {
-                    return thatPath;
-                }
-
-                thatPath = thatPathStandalone;
-                if (fs.existsSync(thatPath)) {
-                    return thatPath;
-                }
-
-            } else {
-
-                thatPath = thatPathStandalone;
-                if (fs.existsSync(thatPath)) {
-                    return thatPath;
-                }
-
-                thatPath = thatPathFolder;
-                if (fs.existsSync(thatPath)) {
-                    return thatPath;
-                }
-
-            }
-
-        }
-    
-    }
-
-    return {error: errors.ERROR_COULD_NOT_FIND};
-
-}
-
 module.exports = {
-    getOtherPath,
+    getFileInformation,
     getPath,
     detectFileType,
     getColumnToOpenIn,

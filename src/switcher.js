@@ -1,7 +1,6 @@
 const vscode = require('vscode');
 const {
-    getPath, getOtherPath,
-    detectFileType, getColumnToOpenIn,
+    getPath, getFileInformation, getColumnToOpenIn,
 } = require('./utils');
 const errors = require('./errors');
 
@@ -18,17 +17,16 @@ function switcher() {
         return;
     }
 
-    const thatPath = getOtherPath(thisPath);
-    const thatType = detectFileType(thatPath);
+    const info = getFileInformation(thisPath);
 
-    if (thatPath.error) {
-        vscode.window.showErrorMessage(thatPath.error);
+    if (info.error) {
+        vscode.window.showErrorMessage(info.error);
         return;
     }
 
     // open the document in an editor
-    vscode.workspace.openTextDocument(thatPath).then((document) => {
-        vscode.window.showTextDocument(document, getColumnToOpenIn(thatType));
+    vscode.workspace.openTextDocument(info.otherPath).then((document) => {
+        vscode.window.showTextDocument(document, getColumnToOpenIn(info.otherType));
     }, (err) => {
         vscode.window.showErrorMessage(err.toString());
     });
