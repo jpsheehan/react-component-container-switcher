@@ -128,8 +128,11 @@ function detectFileType(filePath) {
     isStandAlone,
     extension,
     path,
-    otherPath,
-} | { error }```
+    otherPath, // only set when no error occurs
+    otherType,
+    otherParentPaths, // contains possible directories where the other file can live IF it doesn't exist
+    error, // only set when an error occurs
+}```
  */
 function getFileInformation(filePath) {
 
@@ -141,7 +144,7 @@ function getFileInformation(filePath) {
     // get some basic, but neccessary file and folder information
     const fileName = path.basename(info.path, info.extension);
 
-    const parentPath = path.resolve(path.join(filePath, '..'));
+    const parentPath = path.resolve(filePath, '..');
     const parentName = path.basename(parentPath);
 
     const grandParentPath = path.resolve(parentPath, '..');
@@ -211,6 +214,8 @@ function getFileInformation(filePath) {
     const reorderedValidExtensions = [info.extension, ...validExtensions.filter((ext) => ext !== info.extension)];
     const reorderedValidThatFolders = [suggestedFolderName, ...thatFolders.filter((folderName) => folderName !== suggestedFolderName)];
 
+    info.otherParentPaths = [];
+
     for (let ext of reorderedValidExtensions) {
 
         for (let thatFolderName of reorderedValidThatFolders) {
@@ -218,36 +223,59 @@ function getFileInformation(filePath) {
             // the parent directory of the component if the parent directory name is correct.
             const thatParentPath = path.resolve(path.join(thisFolderPath, '..', thatFolderName));
 
-            // the path of the component if it is indeed inside a folder
-            const thatPathFolder = path.join(thatParentPath, info.name, 'index' + ext);
+            // check to see if the parent folder actually exists on the filesystem
+            // this avoids us having to make other fs checks
+            if (existsSync(thatParentPath)) {
 
-            // the path of the component if it is in a file by itself.
-            const thatPathStandalone = path.join(thatParentPath, info.name + ext);
+                // if this path isn't in the info.otherParentPaths, append it to the array
+                if (info.otherParentPaths.indexOf(thatParentPath) === -1) {
 
-            // here, we will try both the folder and standalone paths but in the order that is
-            // inferred by the location of the container
-            if (info.isStandalone) {
+                    // windows has case insensitive filesystems (NTFS, FAT, etc)
+                    // so we must perform a check to see if the case insensitive path
+                    // already exists in the array
 
-                info.otherPath = thatPathFolder;
-                if (existsSync(info.otherPath)) {
-                    return info;
+                    if (info.otherParentPaths.filter(
+                        (path) => path.toLowerCase() === thatParentPath.toLowerCase()
+                        ).length === 0) {
+
+                        info.otherParentPaths.push(thatParentPath);
+
+                    }
+
                 }
 
-                info.otherPath = thatPathStandalone;
-                if (existsSync(info.otherPath)) {
-                    return info;
-                }
+                // the path of the component if it is indeed inside a folder
+                const thatPathFolder = path.join(thatParentPath, info.name, 'index' + ext);
 
-            } else {
+                // the path of the component if it is in a file by itself.
+                const thatPathStandalone = path.join(thatParentPath, info.name + ext);
 
-                info.otherPath = thatPathStandalone;
-                if (existsSync(info.otherPath)) {
-                    return info;
-                }
+                // here, we will try both the folder and standalone paths but in the order that is
+                // inferred by the location of the container
+                if (info.isStandalone) {
 
-                info.otherPath = thatPathFolder;
-                if (existsSync(info.otherPath)) {
-                    return info;
+                    info.otherPath = thatPathFolder;
+                    if (existsSync(info.otherPath)) {
+                        return info;
+                    }
+
+                    info.otherPath = thatPathStandalone;
+                    if (existsSync(info.otherPath)) {
+                        return info;
+                    }
+
+                } else {
+
+                    info.otherPath = thatPathStandalone;
+                    if (existsSync(info.otherPath)) {
+                        return info;
+                    }
+
+                    info.otherPath = thatPathFolder;
+                    if (existsSync(info.otherPath)) {
+                        return info;
+                    }
+
                 }
 
             }

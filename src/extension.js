@@ -12,13 +12,15 @@ function activate(context) {
 
     const statusBarMonitor = new StatusBarMonitor(context.subscriptions);
     const switchCommand = vscode.commands.registerCommand('extension.switch', switcher);
-
-    disposables.push(vscode.window.onDidChangeActiveTextEditor(
+    const onActiveEditorChange = vscode.window.onDidChangeActiveTextEditor(
         (editor) => statusBarMonitor.listener(editor.document)
-    ));
+    );
+
+    disposables.push(onActiveEditorChange);
     disposables.push(switchCommand);
 
     context.subscriptions.push(switchCommand);
+    context.subscriptions.push(onActiveEditorChange);
 
 }
 exports.activate = activate;
