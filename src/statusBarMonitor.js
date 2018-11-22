@@ -5,11 +5,12 @@ const {
 
 class StatusBarMonitor {
 
-    constructor() {
+    constructor(subscriptions) {
 
         // setup the StatusBarItem
         this.item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
         this.item.command = 'extension.switch';
+        subscriptions.push(this.item);
 
     }
 

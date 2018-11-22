@@ -4,14 +4,21 @@ const vscode = require('vscode');
 const {switcher} = require('./switcher');
 const {StatusBarMonitor} = require('./statusBarMonitor');
 
+const disposables = [];
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
 
-    const statusBarMonitor = new StatusBarMonitor();
-    vscode.window.onDidChangeActiveTextEditor((editor) => statusBarMonitor.listener(editor.document))
+    const statusBarMonitor = new StatusBarMonitor(context.subscriptions);
+    const switchCommand = vscode.commands.registerCommand('extension.switch', switcher);
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.switch', switcher));
+    disposables.push(vscode.window.onDidChangeActiveTextEditor(
+        (editor) => statusBarMonitor.listener(editor.document)
+    ));
+    disposables.push(switchCommand);
+
+    context.subscriptions.push(switchCommand);
 
 }
 exports.activate = activate;
@@ -19,7 +26,13 @@ exports.activate = activate;
 // this method is called when your extension is deactivated
 function deactivate() {
     
-    // TODO: should probably dispose of things here...
+    disposables.forEach((disposable) => {
+        if (disposable.hasOwnProperty('dispose') || disposable.dispose) {
+            disposable.dispose();
+        } else {
+            console.warn(`RCCS extension: Failed to dispose of ${disposable}`);
+        }
+    });
 
 }
 exports.deactivate = deactivate;

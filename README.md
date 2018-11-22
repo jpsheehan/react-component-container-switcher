@@ -57,11 +57,15 @@ Users appreciate release notes as you update your extension.
 
 ### 0.2.0
 
+#### Features:
 - Added a configuration option for opening containers always in the left, right or active column.
 - Added a status bar item showing what kind of file is open. Clicking on this will switch to the other kind.
+- Added the name of the container/component to the status bar item.
 - Hovering over the status bar item will show some information about the current file.
-- Added the name of the container/component to the status bar.
+
+#### Bug Fixes:
 - Fixed a Windows case-insensitivity file path bug.
+- Added proper cleanup of extension code.
 
 ### 0.1.2
 
