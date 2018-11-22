@@ -57,7 +57,8 @@ Users appreciate release notes as you update your extension.
 
 ### 0.2.0
 
-Added a configuration option for opening containers always in the left, right or active column.
+- Added a configuration option for opening containers always in the left, right or active column.
+- Added a status bar item showing what kind of file is open. Clicking on this will switch to the other kind.
 
 ### 0.1.2
 

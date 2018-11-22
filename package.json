@@ -20,7 +20,11 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.switch"
+        "onCommand:extension.switch",
+        "onLanguage:javascript",
+        "onLanguage:typescript",
+        "onLanguage:javascriptreact",
+        "onLanguage:typescriptreact"
     ],
     "main": "./src/extension",
     "contributes": {
