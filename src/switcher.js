@@ -1,8 +1,21 @@
 const vscode = require('vscode');
+const path = require('path');
+const fs = require('fs');
+
 const {
     getPath, getFileInformation, getColumnToOpenIn,
+    existsSync,
 } = require('./utils');
 const errors = require('./errors');
+
+// opens the document in an editor
+function openDocument(fileInfo) {
+    vscode.workspace.openTextDocument(fileInfo.otherPath).then((document) => {
+        vscode.window.showTextDocument(document, getColumnToOpenIn(fileInfo.otherType));
+    }, (err) => {
+        vscode.window.showErrorMessage(err.toString());
+    });
+}
 
 function switcher() {
 
@@ -33,7 +46,58 @@ function switcher() {
 
                 if (selection && selection === 'Yes') {
 
-                    console.log(`Here, we would create a new ${info.otherType}`);
+                    if (info.otherParentPaths.length === 1) {
+
+                        const parentPath = info.otherParentPaths[0];
+                        
+                        let filePath = null;
+
+                        if (info.isStandalone) {
+                            
+                            filePath = info.name + info.extension;
+
+                        } else {
+
+                            filePath = path.join(info.name, 'index' + info.extension);
+
+                        }
+
+                        vscode.window.showInputBox({
+                            prompt: `Enter the path for the ${info.otherType}:`,
+                            value: filePath,
+                        }).then((chosenPath) => {
+
+                            // verify that the path was chosen
+                            if (chosenPath) {
+
+                                info.otherPath = path.join(parentPath, chosenPath);
+                                const chosenParent = path.join(info.otherPath, '..');
+
+                                // create the parent if it doesn't exist
+                                if (!existsSync(chosenParent)) {
+                                    console.log(`Making parent ${chosenParent}`)
+                                    fs.mkdirSync(chosenParent);
+                                }
+
+                                // safely create the file and then close it.
+                                // does not overwrite if it exists
+                                fs.closeSync(fs.openSync(info.otherPath, 'a'));
+
+                                openDocument(info);
+
+                            } else {
+
+                                return;
+
+                            }
+                            
+                        });
+
+                    } else {
+
+                        vscode.window.showWarningMessage(`We don't yet have support for similarly named folders :( send me an email`)
+
+                    }
 
                 }
 
@@ -46,14 +110,12 @@ function switcher() {
         }
 
         return;
-    }
+    
+    } else {
 
-    // open the document in an editor
-    vscode.workspace.openTextDocument(info.otherPath).then((document) => {
-        vscode.window.showTextDocument(document, getColumnToOpenIn(info.otherType));
-    }, (err) => {
-        vscode.window.showErrorMessage(err.toString());
-    });
+        openDocument(info);
+
+    }
 
 }
 
