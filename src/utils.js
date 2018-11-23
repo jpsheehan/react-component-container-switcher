@@ -7,7 +7,7 @@ const errors = require('./errors');
 const config = require('./configuration');
 
 const validExtensions = ['.js', '.ts', '.jsx', '.tsx'];
-const validContainerFolders = ['container', 'Container', 'containers', 'Containers'];
+const validContainerFolders = ['container', 'Container', 'containers', 'Containers', 'MyContainers'];
 const validComponentFolders = ['component', 'Component', 'components', 'Components'];
 
 const FileType = {
@@ -180,6 +180,7 @@ function getFileInformation(filePath) {
 
     // we check if its parent has a valid container name
     thatPathIndex = thisFolders.indexOf(parentName);
+
     if (thatPathIndex !== -1) {
 
         info.name = fileName;
@@ -211,6 +212,11 @@ function getFileInformation(filePath) {
     // attempt to find the corresponding component that best matches what
     // kind of layout the container has. We search through all possible
     // validComponentFolders with the suggested folder name first.
+
+    // in certain cases when the validComponentFolders and validContainerFolders don't have the same number of elements
+    if (thatPathIndex >= thatFolders.length) {
+        thatPathIndex = 0;
+    }
     const suggestedFolderName = thatFolders[thatPathIndex];
 
     // reorder these so that we are looking for the preferred filename extension and folder names first

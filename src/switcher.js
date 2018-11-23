@@ -17,6 +17,33 @@ function openDocument(fileInfo) {
     });
 }
 
+function promptForParentFolder(fileInfo, callback) {
+
+    if (fileInfo.otherParentPaths.length === 1) {
+
+        // in the case where there is only one valid parent directory, we just use it by default
+        callback(fileInfo.otherParentPaths[0]);
+    
+    } else {
+        
+        // all the otherParentPaths are siblings so we can find their parent by looking
+        // at just the first one
+        const dirname = path.dirname(fileInfo.otherParentPaths[0]);
+
+        // otherwise we prompt the user to select a directory
+        vscode.window.showQuickPick(fileInfo.otherParentPaths.map(
+            (parentPath) => path.basename(parentPath)
+        ), {
+            placeHolder: `Select the folder where you would like to add the ${fileInfo.name} ${fileInfo.otherType}`
+        }).then(
+            (folderName) => callback(path.join(dirname, folderName)),
+            () => callback()
+        );
+
+    }
+
+}
+
 function switcher() {
 
     let thisPath = null;
@@ -44,60 +71,58 @@ function switcher() {
                 placeHolder: `An existing ${info.otherType} doesn't exist, would you like to create one?`,
             }).then((selection) => {
 
+                // only take action if they've selected "Yes"
                 if (selection && selection === 'Yes') {
 
-                    if (info.otherParentPaths.length === 1) {
+                    promptForParentFolder(info, (selectedParentPath) => {
 
-                        const parentPath = info.otherParentPaths[0];
-                        
-                        let filePath = null;
+                        if (selectedParentPath) {
 
-                        if (info.isStandalone) {
-                            
-                            filePath = info.name + info.extension;
+                            let filePath = null;
 
-                        } else {
-
-                            filePath = path.join(info.name, 'index' + info.extension);
+                            if (info.isStandalone) {
+                                
+                                filePath = info.name + info.extension;
+        
+                            } else {
+        
+                                filePath = path.join(info.name, 'index' + info.extension);
+        
+                            }
+        
+                            vscode.window.showInputBox({
+                                prompt: `Enter the path for the ${info.otherType}:`,
+                                value: filePath,
+                            }).then((chosenPath) => {
+        
+                                // verify that the path was chosen
+                                if (chosenPath) {
+        
+                                    info.otherPath = path.join(selectedParentPath, chosenPath);
+                                    const chosenParent = path.join(info.otherPath, '..');
+        
+                                    // create the parent if it doesn't exist
+                                    if (!existsSync(chosenParent)) {
+                                        fs.mkdirSync(chosenParent);
+                                    }
+        
+                                    // safely create the file and then close it.
+                                    // does not overwrite if it exists
+                                    fs.closeSync(fs.openSync(info.otherPath, 'a'));
+        
+                                    openDocument(info);
+        
+                                } else {
+        
+                                    return;
+        
+                                }
+                                
+                            });
 
                         }
 
-                        vscode.window.showInputBox({
-                            prompt: `Enter the path for the ${info.otherType}:`,
-                            value: filePath,
-                        }).then((chosenPath) => {
-
-                            // verify that the path was chosen
-                            if (chosenPath) {
-
-                                info.otherPath = path.join(parentPath, chosenPath);
-                                const chosenParent = path.join(info.otherPath, '..');
-
-                                // create the parent if it doesn't exist
-                                if (!existsSync(chosenParent)) {
-                                    console.log(`Making parent ${chosenParent}`)
-                                    fs.mkdirSync(chosenParent);
-                                }
-
-                                // safely create the file and then close it.
-                                // does not overwrite if it exists
-                                fs.closeSync(fs.openSync(info.otherPath, 'a'));
-
-                                openDocument(info);
-
-                            } else {
-
-                                return;
-
-                            }
-                            
-                        });
-
-                    } else {
-
-                        vscode.window.showWarningMessage(`We don't yet have support for similarly named folders :( send me an email`)
-
-                    }
+                    });
 
                 }
 
