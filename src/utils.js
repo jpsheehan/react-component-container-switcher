@@ -4,6 +4,7 @@ const process = require('process');
 const fs = require('fs');
 
 const errors = require('./errors');
+const config = require('./configuration');
 
 const validExtensions = ['.js', '.ts', '.jsx', '.tsx'];
 const validContainerFolders = ['container', 'Container', 'containers', 'Containers'];
@@ -46,7 +47,7 @@ function existsSync(path) {
  */
 function getColumnToOpenIn(type) {
 
-    const positionConfig = vscode.workspace.getConfiguration().get('rccs.alwaysOpenContainersToTheLeft');
+    const positionConfig = config.getContainerOpeningColumn();
     
     if (positionConfig === 'Same') {
 

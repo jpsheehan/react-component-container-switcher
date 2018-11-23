@@ -3,6 +3,8 @@ const {
     getPath, getFileInformation,
 } = require('./utils');
 
+const config = require('./configuration');
+
 class StatusBarMonitor {
 
     constructor(subscriptions) {
@@ -22,6 +24,13 @@ class StatusBarMonitor {
     listener(document) {
         
         const path = getPath(document.uri);
+
+        if (!config.getEnableStatusBarItem()) {
+
+            this.item.hide();
+            return;
+
+        }
 
         if (path) {
     

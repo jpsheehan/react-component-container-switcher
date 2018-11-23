@@ -49,8 +49,14 @@
                 "rccs.alwaysOpenContainersToTheLeft": {
                     "type": "string",
                     "enum": ["Same", "Left", "Right"],
-                    "default": "left",
+                    "default": "Left",
                     "description": "Which pane should containers always be opened in?"
+                },
+                "rccs.enableStatusBarItem": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show status bar item?"
+
                 }
             }
         }
