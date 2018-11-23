@@ -4,7 +4,11 @@ This extension allows you to quickly switch between your React components and th
 
 ## Features
 
-Pressing `Ctrl+Shift+P` and then begin typing `RCCS: Switch to associated component/container` which will allow you to switch between components and containers. ALternatively, pressing `Alt+C` will also switch between the two.
+Pressing `Ctrl+Shift+P` and then begin typing `RCCS: Switch to associated component/container` which will allow you to switch between components and containers. ALternatively, pressing `Alt+C` will also switch between the two. If the other file doesn't exist you will be prompted to create it.
+
+A button on the status bar allows you to see the kind of file currently open and allows you to switch to the other kind by clicking.
+
+You can configure this extension always open the different file types in diffent parts of the screen.
 
 ## Requirements
 
@@ -28,18 +32,18 @@ If the extension cannot find a valid component/container to switch to, it will d
 This is an example of a valid (although, poor) directory structure, where every component has a corresponding container:
 ```
 +---components
-|   |   Navbar.js
+|   |   Navbar.jsx
 |   |   SignIn.ts
 |   |
 |   +---Avatar
 |   |       index.js
 |   |
 |   \---SignOut
-|           index.ts
+|           index.tsx
 |
 \---Container
     |   Avatar.ts
-    |   SignIn.ts
+    |   SignIn.tsx
     |   SignOut.js
     |
     \---Navbar
@@ -53,24 +57,18 @@ No known issues.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 0.2.0
 
-#### Features:
-- Added a configuration option for opening containers always in the left, right or active column.
-- Added a status bar item showing what kind of file is open. Clicking on this will switch to the other kind.
-- Added the name of the container/component to the status bar item.
-- Hovering over the status bar item will show some information about the current file.
-
-#### Bug Fixes:
-- Fixed a Windows case-insensitivity file path bug.
-- Added proper cleanup of extension code.
+- Added a status bar item that shows information about the current file. Clicking this triggers file switching.
+- When switching to a file that doesn't exist, you will be prompted to create the file.
+- Added a configuration option to open specific types of files on different parts of the screen.
+- Added a configuration option for the status bar item.
+- Bug fixes.
 
 ### 0.1.2
 
-Added support for `.jsx` and `.tsx` files.
+- Added support for `.jsx` and `.tsx` files.
 
 ### 0.1.0
 
-Initial release.
+- Initial release.
