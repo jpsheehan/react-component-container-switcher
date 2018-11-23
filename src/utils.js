@@ -1,6 +1,8 @@
 const vscode = require('vscode');
 const path = require('path');
+const process = require('process');
 const fs = require('fs');
+
 const errors = require('./errors');
 
 const validExtensions = ['.js', '.ts', '.jsx', '.tsx'];
@@ -181,7 +183,7 @@ function getFileInformation(filePath) {
 
         info.name = fileName;
         thisFolderPath = parentPath;
-        info.isStandalone = false;
+        info.isStandalone = true;
 
     } else {
 
@@ -192,7 +194,7 @@ function getFileInformation(filePath) {
 
             info.name = parentName;
             thisFolderPath = grandParentPath;
-            info.isStandalone = true;
+            info.isStandalone = false;
 
         }
 
@@ -230,14 +232,23 @@ function getFileInformation(filePath) {
                 // if this path isn't in the info.otherParentPaths, append it to the array
                 if (info.otherParentPaths.indexOf(thatParentPath) === -1) {
 
-                    // windows has case insensitive filesystems (NTFS, FAT, etc)
-                    // so we must perform a check to see if the case insensitive path
-                    // already exists in the array
+                    if (process.platform === 'win32') {
 
-                    if (info.otherParentPaths.filter(
-                        (path) => path.toLowerCase() === thatParentPath.toLowerCase()
-                        ).length === 0) {
+                        // windows has case insensitive filesystems (NTFS, FAT, etc)
+                        // so we must perform a check to see if the case insensitive path
+                        // already exists in the array
 
+                        if (info.otherParentPaths.filter(
+                            (path) => path.toLowerCase() === thatParentPath.toLowerCase()
+                            ).length === 0) {
+
+                            info.otherParentPaths.push(thatParentPath);
+
+                        }
+
+                    } else {
+
+                        // we aren't running windows so push the path
                         info.otherParentPaths.push(thatParentPath);
 
                     }
@@ -321,4 +332,5 @@ module.exports = {
     getPath,
     detectFileType,
     getColumnToOpenIn,
+    existsSync,
 };
