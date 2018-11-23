@@ -19,6 +19,7 @@ function activate(context) {
 
     disposables.push(onActiveEditorChange);
     disposables.push(switchCommand);
+    disposables.push(statusBarMonitor);
 
     disposables.forEach((disposable) => {
         context.subscriptions.push(disposable);
