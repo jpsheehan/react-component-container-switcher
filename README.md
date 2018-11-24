@@ -61,6 +61,7 @@ No known issues.
 
 - Added a status bar item that shows information about the current file. Clicking this triggers file switching.
 - When switching to a file that doesn't exist, you will be prompted to create the file.
+- Added templates when creating containers and components.
 - Added a configuration option to open specific types of files on different parts of the screen.
 - Added a configuration option for the status bar item.
 - Bug fixes.
