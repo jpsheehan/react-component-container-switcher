@@ -7,7 +7,7 @@ const errors = require('./errors');
 const config = require('./configuration');
 
 const validExtensions = ['.js', '.ts', '.jsx', '.tsx'];
-const validContainerFolders = ['container', 'Container', 'containers', 'Containers', 'MyContainers'];
+const validContainerFolders = ['container', 'Container', 'containers', 'Containers'];
 const validComponentFolders = ['component', 'Component', 'components', 'Components'];
 
 const FileType = {
