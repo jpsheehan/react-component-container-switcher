@@ -340,4 +340,5 @@ module.exports = {
     detectFileType,
     getColumnToOpenIn,
     existsSync,
+    FileType,
 };

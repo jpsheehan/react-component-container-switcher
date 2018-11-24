@@ -4,14 +4,49 @@ const fs = require('fs');
 
 const {
     getPath, getFileInformation, getColumnToOpenIn,
-    existsSync,
+    existsSync, FileType,
 } = require('./utils');
 const errors = require('./errors');
+const templates = require('./templates');
+
+const ComponentTypes = {
+    Class: 'Class Component',
+    Functional: 'Functional Component',
+    Empty: 'Empty File',
+};
+
+/**
+ * Creates a new document synchronously.
+ * 
+ * @param {Object} fileInfo Describes the file to create.
+ */
+function createNewDocument(fileInfo, componentType=null) {
+
+    let data = '';
+
+    if (fileInfo.type === FileType.Component) {
+
+        if (componentType === ComponentTypes.Functional) {
+            data = templates.classComponent(fileInfo);
+        } else if (componentType === ComponentTypes.Class) {
+            data = templates.functionalComponent(fileInfo);
+        } else if (componentType === ComponentTypes.Empty) {
+            data = '';
+        }
+
+    } else {
+
+        data = templates.container(fileInfo);
+
+    }
+
+    fs.writeFileSync(fileInfo.path, data);
+}
 
 // opens the document in an editor
 function openDocument(fileInfo) {
-    vscode.workspace.openTextDocument(fileInfo.otherPath).then((document) => {
-        vscode.window.showTextDocument(document, getColumnToOpenIn(fileInfo.otherType));
+    vscode.workspace.openTextDocument(fileInfo.path).then((document) => {
+        vscode.window.showTextDocument(document, getColumnToOpenIn(fileInfo.type));
     }, (err) => {
         vscode.window.showErrorMessage(err.toString());
     });
@@ -105,12 +140,36 @@ function switcher() {
                                     if (!existsSync(chosenParent)) {
                                         fs.mkdirSync(chosenParent);
                                     }
-        
-                                    // safely create the file and then close it.
-                                    // does not overwrite if it exists
-                                    fs.closeSync(fs.openSync(info.otherPath, 'a'));
-        
-                                    openDocument(info);
+
+                                    // everything is ready,
+                                    // create the document and open it
+                                    const otherInfo = {
+                                        name: info.name,
+                                        type: info.otherType,
+                                        path: info.otherPath,
+                                        extension: path.extname(info.otherPath),
+                                        isStandalone: path.basename(info.otherPath) !== ('index' + path.extname(info.otherPath)),
+                                        otherType: info.type,
+                                        otherPath: info.path,
+                                        otherExtension: info.extension,
+                                    };
+
+                                    if (otherInfo.type === FileType.Component) {
+
+                                        vscode.window.showQuickPick([...(Object.keys(ComponentTypes).map(key => ComponentTypes[key]))], {
+                                            placeHolder: 'What kind of component do you want to create?',
+                                        }).then((choice) => {
+                                            createNewDocument(otherInfo, choice);
+                                            openDocument(otherInfo);
+                                        });
+
+                                    } else {
+
+                                        createNewDocument(otherInfo);
+                                        openDocument(otherInfo);
+
+                                    }
+
         
                                 } else {
         
@@ -138,7 +197,10 @@ function switcher() {
     
     } else {
 
-        openDocument(info);
+        openDocument({
+            path: info.otherPath,
+            type: info.otherType,
+        });
 
     }
 
