@@ -12,7 +12,7 @@
         "url": "https://github.com/jpsheehan/react-component-container-switcher"
     },
     "description": "Allows easy switching between React Components and their associated Containers.",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "engines": {
         "vscode": "^1.29.0"
     },
@@ -48,7 +48,11 @@
             "properties": {
                 "rccs.alwaysOpenContainersToTheLeft": {
                     "type": "string",
-                    "enum": ["Same", "Left", "Right"],
+                    "enum": [
+                        "Same",
+                        "Left",
+                        "Right"
+                    ],
                     "default": "Left",
                     "description": "Which pane should containers always be opened in?"
                 },
@@ -56,7 +60,6 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Show status bar item?"
-
                 }
             }
         }
