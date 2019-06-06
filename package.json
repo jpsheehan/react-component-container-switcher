@@ -1,6 +1,7 @@
 {
     "name": "react-component-container-switcher",
     "displayName": "React Component/Container Switcher",
+    "license": "GPL-3.0-only",
     "author": {
         "email": "jesse@sheehan.nz",
         "name": "JP Sheehan",
